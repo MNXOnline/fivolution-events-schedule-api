@@ -18,7 +18,7 @@ export class EventsController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createEventDto: CreateEventDto) {
+  async create(@Body() createEventDto: CreateEventDto): Promise<any> {
     return this.eventsService.create(createEventDto);
   }
 
@@ -26,6 +26,12 @@ export class EventsController {
   @HttpCode(200)
   findAll() {
     return this.eventsService.findAll();
+  }
+
+  @Get('active')
+  @HttpCode(200)
+  findAllActive() {
+    return this.eventsService.findActiveEvents();
   }
 
   @Get(':id')

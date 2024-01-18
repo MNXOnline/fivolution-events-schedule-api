@@ -1,11 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 
+/**
+ * @description Database handler service for Event datamodel
+ * @author Mannix Manglani
+ * @date 18/01/2024
+ * @export
+ * @class EventsService
+ */
 @Injectable()
 export class EventsService {
+  constructor(@InjectModel(Event.name) private eventModel: Model<Event>) {}
+
   create(createEventDto: CreateEventDto) {
-    return 'This action adds a new event';
+    const newExhibitor = new this.eventModel(createEventDto);
+    return newExhibitor.save();
   }
 
   findAll() {
@@ -22,5 +34,9 @@ export class EventsService {
 
   remove(id: number) {
     return `This action removes a #${id} event`;
+  }
+
+  async findActiveEvents(): Promise<Event[]> {
+    return this.eventModel.find({ isActive: true }).exec();
   }
 }
