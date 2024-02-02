@@ -7,7 +7,7 @@ async function bootstrap() {
       process.env.ENABLE_CORS.toLowerCase() == 'true' &&
       process.env.NODE_ENV.toLowerCase() == 'development',
   });
-  app.setGlobalPrefix('events-schedule');
+  // app.setGlobalPrefix('events-schedule');
 
   await app.listen(process.env.PORT);
 }
