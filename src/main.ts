@@ -1,6 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-
+/**
+ * @description App bootstrap with cors enabled on development mode
+ * @author Mannix Manglani
+ * @date 18/01/2024
+ */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors:

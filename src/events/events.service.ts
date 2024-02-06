@@ -15,13 +15,21 @@ import { InjectModel } from '@nestjs/mongoose';
 export class EventsService {
   constructor(@InjectModel(Event.name) private eventModel: Model<Event>) {}
 
-  create(createEventDto: CreateEventDto) {
-    const newExhibitor = new this.eventModel(createEventDto);
-    return newExhibitor.save();
+  /**
+   * @description Creates an Event
+   * @author Mannix Manglani
+   * @date 18/01/2024
+   * @param {CreateEventDto} createEventDto
+   * @returns {*}  {Promise<Event>}
+   * @memberof EventsService
+   */
+  async create(createEventDto: CreateEventDto): Promise<Event> {
+    const newEvent = new this.eventModel(createEventDto);
+    return newEvent.save();
   }
 
-  findAll() {
-    return `This action returns all events`;
+  async findAll(): Promise<Event[]> {
+    return this.eventModel.find();
   }
 
   findOne(id: number) {

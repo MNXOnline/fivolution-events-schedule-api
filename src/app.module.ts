@@ -6,10 +6,17 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { EventsModule } from './events/events.module';
 
+/**
+ * @description AppModule with mongoose
+ * @author Mannix Manglani
+ * @date 18/01/2024
+ * @export
+ * @class AppModule
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Hace que ConfigModule esté disponible globalmente
+      isGlobal: true, // Makes ConfigModule globally available
     }),
     MongooseModule.forRoot(process.env.DATABASE_URI, {
       dbName: process.env.DATABASE_NAME,
