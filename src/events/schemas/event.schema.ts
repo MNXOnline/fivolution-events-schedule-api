@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
 import { Thing } from 'src/common/schemas/thing.schema';
+import { Schedule, ScheduleSchema } from './schedule.schema';
 
 @Schema()
 export class Event extends Thing {
@@ -12,6 +14,8 @@ export class Event extends Thing {
   @Prop({ type: Boolean, default: false })
   isSPromoted: boolean;
 
+  @Prop({ type: [ScheduleSchema] }) // Usando un array de ScheduleSchema
+  eventSchedule: Types.Array<Schedule>;
   // TODO Evaluate a more complex structure for isActive and isPromoted
 }
 

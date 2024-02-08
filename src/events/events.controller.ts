@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   HttpCode,
+  Headers,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -24,6 +25,17 @@ export class EventsController {
 
   @Get()
   @HttpCode(200)
+  getEventsByDate(
+    @Headers('start-date') startDate: string,
+    @Headers('end-date') endDate?: string, // Opcional, para soportar rangos de fechas
+  ) {
+    if (startDate)
+      return this.eventsService.getEventsByDate(startDate, endDate);
+    else return this.eventsService.findAll();
+  }
+
+  @Get()
+  @HttpCode(200)
   findAll() {
     return this.eventsService.findAll();
   }
@@ -34,10 +46,10 @@ export class EventsController {
     return this.eventsService.findActiveEvents();
   }
 
-  @Get(':id')
+  @Get(':uuid')
   @HttpCode(200)
-  findOne(@Param('id') id: string) {
-    return this.eventsService.findOne(+id);
+  findByUuid(@Param('uuid') uuid: string) {
+    return this.eventsService.findByUuid(uuid);
   }
 
   @Patch(':id')
