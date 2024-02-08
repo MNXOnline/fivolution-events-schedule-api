@@ -3,7 +3,7 @@ import { EventsService } from './events.service';
 import { EventsController } from './events.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Event, EventSchema } from './schemas/event.schema';
-import { ClientIdMiddleware } from 'src/common/schemas/middleware/client-id.middleware';
+import { ClientIdMiddleware } from 'src/common/middleware/client-id.middleware';
 
 @Module({
   imports: [

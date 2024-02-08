@@ -4,6 +4,8 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Event } from './schemas/event.schema';
+import { generateSlug } from 'src/common/utils/slug.utils';
+import slugify from 'slugify';
 
 /**
  * @description Database handler service for Event datamodel
@@ -25,8 +27,31 @@ export class EventsService {
    * @memberof EventsService
    */
   async create(createEventDto: CreateEventDto): Promise<Event> {
-    const newEvent = new this.eventModel(createEventDto);
+    const slug = await this.getEventSlug(createEventDto);
+    const eventWithSlug = {
+      ...createEventDto,
+      slug, // Añade el slug único al DTO antes de crear el evento
+    };
+    const newEvent = new this.eventModel(eventWithSlug);
     return newEvent.save();
+  }
+
+  private async getEventSlug(createEventDto: CreateEventDto): Promise<string> {
+    let slug = generateSlug(createEventDto.name);
+    let existingEvent = await this.eventModel.findOne({ slug }).exec();
+    let counter = 1;
+
+    while (existingEvent) {
+      const newSlug = `${slug}-${counter}`;
+      existingEvent = await this.eventModel.findOne({ slug: newSlug }).exec();
+      if (!existingEvent) {
+        slug = newSlug; // Slug disponible encontrado
+        break;
+      }
+      counter++;
+    }
+
+    return slug;
   }
 
   async findAll(): Promise<Event[]> {
@@ -60,6 +85,10 @@ export class EventsService {
 
   async findByUuid(uuid: string): Promise<Event | null> {
     return this.eventModel.findOne({ uuid }).exec();
+  }
+
+  async findBySlug(slug: string): Promise<Event | null> {
+    return this.eventModel.findOne({ slug }).exec();
   }
 
   update(id: number, updateEventDto: UpdateEventDto) {

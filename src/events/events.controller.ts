@@ -12,6 +12,7 @@ import {
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { isUUID } from 'class-validator';
 
 @Controller('events')
 export class EventsController {
@@ -46,10 +47,11 @@ export class EventsController {
     return this.eventsService.findActiveEvents();
   }
 
-  @Get(':uuid')
+  @Get(':uuidorslug')
   @HttpCode(200)
-  findByUuid(@Param('uuid') uuid: string) {
-    return this.eventsService.findByUuid(uuid);
+  findByUuidOrSlug(@Param('uuidorslug') uuidOrSlug: string) {
+    if (isUUID(uuidOrSlug)) return this.eventsService.findByUuid(uuidOrSlug);
+    else return this.eventsService.findBySlug(uuidOrSlug);
   }
 
   @Patch(':id')

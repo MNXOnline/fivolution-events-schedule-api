@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
- * @description Base datamodel for schemas based on schema.org
+ * @description Base datamodel for schemas based on schema.org's Thing
  * @author Mannix Manglani
  * @date 17/01/2024
  * @export
@@ -15,6 +15,9 @@ export class Thing {
 
   @Prop()
   name: string;
+
+  @Prop()
+  slug: string;
 
   @Prop()
   description: string;
