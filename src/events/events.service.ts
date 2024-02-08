@@ -66,6 +66,7 @@ export class EventsService {
   }
 
   async findByUuidOrSlug(uuidOrSlug: string) {
+<<<<<<< HEAD
     if (isUUID(uuidOrSlug))
       return this.eventModel.findOne({ uuid: uuidOrSlug }).exec();
     else return this.eventModel.findOne({ slug: uuidOrSlug }).exec();
@@ -74,6 +75,18 @@ export class EventsService {
   async update(uuidOrSlug: string, updateEventDto: UpdateEventDto) {
     const event = await this.findByUuidOrSlug(uuidOrSlug);
 
+=======
+    console.log(isUUID(uuidOrSlug));
+
+    if (isUUID(uuidOrSlug))
+      return this.eventModel.findOne({ uuid: uuidOrSlug }).exec();
+    else return this.eventModel.findOne({ slug: uuidOrSlug }).exec();
+  }
+
+  async update(uuidOrSlug: string, updateEventDto: UpdateEventDto) {
+    const event = await this.findByUuidOrSlug(uuidOrSlug);
+
+>>>>>>> fe95a5daee6674af3731200bd67afc4ed19fba96
     if (!event) {
       throw new NotFoundException(`Evento ${uuidOrSlug} no encontrado`);
     }
