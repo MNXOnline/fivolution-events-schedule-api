@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Event } from './schemas/event.schema';
 import { generateSlug } from 'src/common/utils/slug.utils';
-import slugify from 'slugify';
+import { isUUID } from 'class-validator';
 
 /**
  * @description Database handler service for Event datamodel
@@ -27,31 +27,13 @@ export class EventsService {
    * @memberof EventsService
    */
   async create(createEventDto: CreateEventDto): Promise<Event> {
-    const slug = await this.getEventSlug(createEventDto);
+    const slug = await this.getEventSlug(createEventDto.name);
     const eventWithSlug = {
       ...createEventDto,
       slug, // Añade el slug único al DTO antes de crear el evento
     };
     const newEvent = new this.eventModel(eventWithSlug);
     return newEvent.save();
-  }
-
-  private async getEventSlug(createEventDto: CreateEventDto): Promise<string> {
-    let slug = generateSlug(createEventDto.name);
-    let existingEvent = await this.eventModel.findOne({ slug }).exec();
-    let counter = 1;
-
-    while (existingEvent) {
-      const newSlug = `${slug}-${counter}`;
-      existingEvent = await this.eventModel.findOne({ slug: newSlug }).exec();
-      if (!existingEvent) {
-        slug = newSlug; // Slug disponible encontrado
-        break;
-      }
-      counter++;
-    }
-
-    return slug;
   }
 
   async findAll(): Promise<Event[]> {
@@ -83,16 +65,36 @@ export class EventsService {
     return `This action returns a #${id} event`;
   }
 
-  async findByUuid(uuid: string): Promise<Event | null> {
-    return this.eventModel.findOne({ uuid }).exec();
+  async findByUuidOrSlug(uuidOrSlug: string) {
+    if (isUUID(uuidOrSlug))
+      return this.eventModel.findOne({ uuid: uuidOrSlug }).exec();
+    else return this.eventModel.findOne({ slug: uuidOrSlug }).exec();
   }
 
-  async findBySlug(slug: string): Promise<Event | null> {
-    return this.eventModel.findOne({ slug }).exec();
-  }
+  async update(uuidOrSlug: string, updateEventDto: UpdateEventDto) {
+    const event = await this.findByUuidOrSlug(uuidOrSlug);
 
-  update(id: number, updateEventDto: UpdateEventDto) {
-    return `This action updates a #${id} event`;
+    if (!event) {
+      throw new NotFoundException(`Evento ${uuidOrSlug} no encontrado`);
+    }
+    // Verifica si el nombre ha cambiado y, de ser así, genera un nuevo slug
+    if (
+      (!updateEventDto.slug || updateEventDto.slug === event.slug) &&
+      updateEventDto.name !== event.name
+    ) {
+      const newSlug = await this.getEventSlug(updateEventDto.name);
+
+      // Actualiza el slug del evento
+      updateEventDto.slug = newSlug;
+    }
+
+    // TODO Revisar con @joel
+    for (const [key, value] of Object.entries(updateEventDto)) {
+      event[key] = value;
+    }
+
+    await event.save();
+    return event;
   }
 
   remove(id: number) {
@@ -101,5 +103,23 @@ export class EventsService {
 
   async findActiveEvents(): Promise<Event[]> {
     return this.eventModel.find({ isActive: true }).exec();
+  }
+
+  private async getEventSlug(eventName: string): Promise<string> {
+    let slug = generateSlug(eventName);
+    let existingEvent = await this.eventModel.findOne({ slug }).exec();
+    let counter = 1;
+
+    while (existingEvent) {
+      const newSlug = `${slug}-${counter}`;
+      existingEvent = await this.eventModel.findOne({ slug: newSlug }).exec();
+      if (!existingEvent) {
+        slug = newSlug; // Slug disponible encontrado
+        break;
+      }
+      counter++;
+    }
+
+    return slug;
   }
 }
